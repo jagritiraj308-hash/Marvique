@@ -1,0 +1,125 @@
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 0;
+    z-index: 1000;
+
+    background: rgba(12, 11, 10, 0.85);
+    backdrop-filter: blur(12px);
+
+    border-bottom: 1px solid transparent;
+    transition: 0.3s ease;
+}
+
+.header.scrolled {
+    padding: 14px 0;
+    border-bottom-color: var(--border);
+}
+
+
+/* NAV CONTAINER */
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* LOGO */
+
+.logo {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.logo span {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+}
+
+.logo small {
+    color: var(--gold);
+    font-size: 8px;
+    letter-spacing: 4px;
+    margin-top: 6px;
+}
+
+
+/* NAVIGATION */
+
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.navbar a {
+    color: #ddd;
+    font-size: 14px;
+    transition: 0.3s ease;
+}
+
+.navbar a:hover,
+.navbar a.active {
+    color: var(--gold);
+}
+
+
+/* MENU BUTTON */
+
+.menu-btn {
+    display: none;
+
+    background: none;
+    border: none;
+    color: white;
+
+    font-size: 25px;
+    cursor: pointer;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .menu-btn {
+        display: block;
+    }
+
+    .navbar {
+        position: absolute;
+
+        top: 100%;
+        left: 0;
+
+        width: 100%;
+
+        display: none;
+        flex-direction: column;
+
+        padding: 25px;
+
+        background: #11100e;
+
+        border-top: 1px solid var(--border);
+    }
+
+    .navbar.show {
+        display: flex;
+    }
+
+    .navbar a {
+        font-size: 16px;
+    }
+
+}

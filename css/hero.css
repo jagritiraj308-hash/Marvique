@@ -1,0 +1,111 @@
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    min-height: 100vh;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            rgba(10, 9, 8, 0.65),
+            rgba(10, 9, 8, 0.9)
+        ),
+        url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=80")
+        center / cover;
+}
+
+.hero-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at center,
+            transparent,
+            rgba(0,0,0,0.55)
+        );
+
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+
+    max-width: 850px;
+
+    padding: 120px 20px 60px;
+}
+
+.hero-subtitle {
+    color: var(--gold);
+
+    font-size: 13px;
+    font-weight: bold;
+
+    letter-spacing: 5px;
+
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-family: Georgia, serif;
+
+    font-size: clamp(45px, 7vw, 82px);
+
+    font-weight: 400;
+
+    line-height: 1.08;
+
+    margin-bottom: 25px;
+}
+
+.hero h1 span {
+    color: var(--gold);
+}
+
+.hero-text {
+    max-width: 650px;
+
+    margin: auto;
+
+    color: #d0cbc2;
+
+    font-size: 17px;
+}
+
+.hero-buttons {
+    margin-top: 35px;
+}
+
+
+/* ANIMATION */
+
+.hero-content {
+    animation: heroAppear 1s ease forwards;
+}
+
+@keyframes heroAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}

@@ -1,0 +1,138 @@
+/* =========================
+   FEATURED COLLECTION
+========================= */
+
+.featured {
+    background: var(--bg-light);
+}
+
+.featured-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 25px;
+}
+
+.product-card {
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    overflow: hidden;
+
+    transition: 0.4s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+
+    border-color: rgba(200,169,107,0.6);
+}
+
+
+/* PRODUCT IMAGE */
+
+.product-image {
+    height: 330px;
+
+    display: flex;
+    align-items: flex-end;
+
+    padding: 25px;
+
+    background-size: cover;
+    background-position: center;
+
+    position: relative;
+}
+
+.product-image::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        transparent,
+        rgba(0,0,0,0.65)
+    );
+}
+
+.product-image span {
+    position: relative;
+    z-index: 1;
+
+    color: white;
+
+    font-size: 11px;
+    letter-spacing: 3px;
+}
+
+
+/* IMAGE TYPES */
+
+.marble-image {
+    background-image:
+        url("https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80");
+}
+
+.porcelain-image {
+    background-image:
+        url("https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1000&q=80");
+}
+
+.ceramic-image {
+    background-image:
+        url("https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80");
+}
+
+
+/* CONTENT */
+
+.product-content {
+    padding: 25px;
+}
+
+.product-content h3 {
+    font-family: Georgia, serif;
+
+    font-size: 25px;
+
+    margin-bottom: 10px;
+}
+
+.product-content p {
+    color: var(--muted);
+
+    font-size: 14px;
+
+    margin-bottom: 18px;
+}
+
+.product-content a {
+    color: var(--gold);
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .featured-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .featured-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

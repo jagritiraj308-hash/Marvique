@@ -1,0 +1,126 @@
+/* =========================
+   GALLERY
+========================= */
+
+.gallery {
+    background: var(--bg);
+}
+
+.gallery-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    grid-auto-rows: 260px;
+
+    gap: 15px;
+}
+
+.gallery-item {
+    position: relative;
+
+    display: flex;
+    align-items: flex-end;
+
+    padding: 22px;
+
+    overflow: hidden;
+
+    background-size: cover;
+    background-position: center;
+
+    transition: 0.4s ease;
+}
+
+.gallery-item::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            transparent 35%,
+            rgba(0,0,0,0.75)
+        );
+
+    transition: 0.4s ease;
+}
+
+.gallery-item:hover {
+    transform: scale(1.02);
+}
+
+.gallery-item:hover::before {
+    background:
+        linear-gradient(
+            transparent 20%,
+            rgba(0,0,0,0.9)
+        );
+}
+
+.gallery-item span {
+    position: relative;
+
+    z-index: 2;
+
+    font-family: Georgia, serif;
+
+    font-size: 20px;
+}
+
+
+/* GALLERY IMAGES */
+
+.gallery-one {
+    background-image:
+        url("https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80");
+}
+
+.gallery-two {
+    background-image:
+        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1000&q=80");
+}
+
+.gallery-three {
+    background-image:
+        url("https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1000&q=80");
+}
+
+.gallery-four {
+    background-image:
+        url("https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1000&q=80");
+}
+
+.gallery-five {
+    background-image:
+        url("https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1000&q=80");
+}
+
+.gallery-six {
+    background-image:
+        url("https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1000&q=80");
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 750px) {
+
+    .gallery-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .gallery-grid {
+        grid-template-columns: 1fr;
+
+        grid-auto-rows: 280px;
+    }
+
+}

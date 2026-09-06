@@ -1,0 +1,86 @@
+/* =========================
+   WHY MARVIQUE
+========================= */
+
+.why {
+    background: var(--bg-light);
+}
+
+.why-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 20px;
+}
+
+.why-card {
+    padding: 35px 25px;
+
+    text-align: center;
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    transition: 0.3s ease;
+}
+
+.why-card:hover {
+    transform: translateY(-7px);
+
+    border-color: var(--gold);
+}
+
+.why-icon {
+    width: 60px;
+    height: 60px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--gold);
+
+    border-radius: 50%;
+
+    color: var(--gold);
+
+    font-size: 25px;
+}
+
+.why-card h3 {
+    font-family: Georgia, serif;
+
+    font-size: 21px;
+
+    margin-bottom: 12px;
+}
+
+.why-card p {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .why-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 550px) {
+
+    .why-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
