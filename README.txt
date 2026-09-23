@@ -169,7 +169,6 @@ PROJECT PURPOSE
 This website is designed for a tiles and marble business.
 
 It can be used as:
-
 - Business Portfolio
 - Product Showcase
 - Marble & Tile Collection Website

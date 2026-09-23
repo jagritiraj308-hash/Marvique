@@ -136,3 +136,31 @@
     }
 
 }
+.product-price {
+    color: #c8a96b;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.product-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.wishlist-btn,
+.favorite-btn {
+    padding: 10px 14px;
+    border: 1px solid #c8a96b;
+    background: transparent;
+    color: #f5f1e8;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.wishlist-btn:hover,
+.favorite-btn:hover {
+    background: #c8a96b;
+    color: #0c0b0a;
+}

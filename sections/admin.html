@@ -1,0 +1,76 @@
+<section class="admin section" id="admin">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <p class="section-subtitle">
+                MANAGEMENT
+            </p>
+
+            <h2>
+                Admin <span>Panel</span>
+            </h2>
+
+        </div>
+
+
+        <div class="admin-login" id="adminLogin">
+
+            <h3>Admin Login</h3>
+
+            <input
+                type="text"
+                id="adminUsername"
+                placeholder="Username">
+
+            <input
+                type="password"
+                id="adminPassword"
+                placeholder="Password">
+
+            <button id="loginBtn">
+                Login
+            </button>
+
+            <p id="loginMessage"></p>
+
+        </div>
+
+
+        <div
+            class="admin-dashboard"
+            id="adminDashboard"
+            style="display:none;">
+
+            <h3>Dashboard</h3>
+
+            <div class="dashboard-cards">
+
+                <div class="dashboard-card">
+                    <h4>Products</h4>
+                    <p id="productCount">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h4>Wishlist</h4>
+                    <p id="adminWishlistCount">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h4>Favorites</h4>
+                    <p id="adminFavoriteCount">0</p>
+                </div>
+
+            </div>
+
+
+            <button id="logoutBtn">
+                Logout
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
