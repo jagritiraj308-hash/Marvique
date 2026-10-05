@@ -1,0 +1,338 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f6f4ef;
+    color: #222;
+}
+
+/* Main Container */
+
+.login-container {
+    min-height: 100vh;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+
+/* Left Side */
+
+.login-image {
+    position: relative;
+
+    background:
+        linear-gradient(
+            rgba(0, 0, 0, 0.35),
+            rgba(0, 0, 0, 0.55)
+        ),
+        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80");
+
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    align-items: center;
+    padding: 70px;
+}
+
+
+.brand-content {
+    color: white;
+    max-width: 500px;
+}
+
+.brand-content h1 {
+    font-family: Georgia, serif;
+
+    font-size: 42px;
+
+    letter-spacing: 7px;
+
+    margin-bottom: 5px;
+}
+
+.brand-content > p:first-of-type {
+    letter-spacing: 5px;
+    font-size: 13px;
+
+    margin-bottom: 70px;
+}
+
+.brand-content h2 {
+    font-family: Georgia, serif;
+
+    font-size: 48px;
+    line-height: 1.15;
+
+    margin-bottom: 25px;
+}
+
+.description {
+    font-size: 16px;
+    line-height: 1.7;
+
+    max-width: 420px;
+}
+
+
+/* Login Side */
+
+.login-box {
+    background: white;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    padding: 60px 12%;
+}
+
+
+.logo {
+    color: #9a7734;
+
+    font-family: Georgia, serif;
+
+    font-size: 28px;
+
+    letter-spacing: 4px;
+
+    font-weight: bold;
+
+    margin-bottom: 45px;
+}
+
+
+.login-box h2 {
+    font-family: Georgia, serif;
+
+    font-size: 36px;
+
+    margin-bottom: 10px;
+}
+
+.login-text {
+    color: #777;
+
+    margin-bottom: 30px;
+
+    line-height: 1.6;
+}
+
+
+/* Input */
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    width: 100%;
+
+    padding: 14px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 6px;
+
+    font-size: 15px;
+}
+
+.input-group input:focus {
+    outline: none;
+
+    border-color: #a17d37;
+}
+
+
+/* Password */
+
+.password-box {
+    display: flex;
+
+    border: 1px solid #ddd;
+
+    border-radius: 6px;
+
+    overflow: hidden;
+}
+
+.password-box input {
+    border: none;
+
+    border-radius: 0;
+
+    flex: 1;
+}
+
+.password-box button {
+    border: none;
+
+    background: white;
+
+    padding: 0 15px;
+
+    color: #9a7734;
+
+    cursor: pointer;
+}
+
+
+/* Options */
+
+.login-options {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+    font-size: 13px;
+}
+
+.remember {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color: #555;
+}
+
+.login-options a {
+    color: #9a7734;
+
+    text-decoration: none;
+}
+
+
+/* Login Button */
+
+.login-btn {
+    width: 100%;
+
+    padding: 15px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #9a7734;
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    background: #765923;
+}
+
+
+/* Message */
+
+#message {
+    text-align: center;
+
+    margin-top: 15px;
+
+    font-size: 14px;
+}
+
+
+/* Divider */
+
+.divider {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin: 30px 0;
+
+    color: #aaa;
+
+    font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+
+    height: 1px;
+
+    background: #ddd;
+
+    flex: 1;
+}
+
+
+/* Signup */
+
+.signup-text {
+    text-align: center;
+
+    color: #777;
+
+    font-size: 14px;
+}
+
+.signup-text a {
+    color: #9a7734;
+
+    text-decoration: none;
+
+    font-weight: bold;
+}
+
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+    .login-container {
+        grid-template-columns: 1fr;
+    }
+
+    .login-image {
+        min-height: 350px;
+
+        padding: 40px;
+    }
+
+    .brand-content h2 {
+        font-size: 36px;
+    }
+
+    .brand-content > p:first-of-type {
+        margin-bottom: 35px;
+    }
+
+    .login-box {
+        padding: 50px 8%;
+    }
+}
