@@ -1,4 +1,4 @@
-<section class="admin section" id="admin">
+ <section class="admin section" id="adminPanel"></section>
 
     <div class="container">
 
@@ -64,6 +64,40 @@
 
             </div>
 
+             
+<!-- ADD PRODUCT FORM -->
+<div class="admin-product-form">
+
+    <h3>Add New Product</h3>
+
+    <input
+        type="text"
+        id="newProductName"
+        placeholder="Product name">
+
+    <textarea
+        id="newProductDescription"
+        placeholder="Product description"></textarea>
+
+    <input
+        type="number"
+        id="newProductPrice"
+        placeholder="Price per sq.ft"
+        min="1">
+
+    <select id="newProductCategory">
+        <option value="MARBLE">Marble</option>
+        <option value="PORCELAIN">Porcelain</option>
+        <option value="CERAMIC">Ceramic</option>
+    </select>
+
+    <button type="button" id="addProductBtn">
+        Add Product
+    </button>
+
+    <p id="productMessage"></p>
+
+</div>
 
             <button id="logoutBtn">
                 Logout
