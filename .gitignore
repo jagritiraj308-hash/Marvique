@@ -1,0 +1,15 @@
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Never commit Cloudinary secrets
+.env
+.env.*

@@ -191,3 +191,22 @@ END OF README
 
 Marvique Tiles & Marble
 Premium Surfaces. Timeless Beauty.
+
+
+FIREBASE & CLOUDINARY
+=====================
+
+The site now supports:
+
+- Firebase email/password login and signup
+- Products stored in Firebase Realtime Database (shared with all visitors)
+- Product image uploads to Cloudinary from the admin panel
+
+Complete the one-time console setup by following:
+
+FIREBASE-CLOUDINARY-SETUP.md
+
+Admin login uses the email listed in firebase-config.js (ADMIN_EMAILS).
+Cloudinary settings live in cloudinary-config.js.
+
+Never place your Cloudinary API secret inside this project.

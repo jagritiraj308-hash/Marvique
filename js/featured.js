@@ -1,54 +1,76 @@
-
 /* =========================
    FEATURED COLLECTION
 ========================= */
 
+import {
+    getProducts,
+    onProductsChange,
+    initProducts
+} from "./products.js";
+
+import { cloudinaryImageUrl } from "./cloudinary.js";
+
 fetch("sections/featured.html")
-    .then(response => response.text())
-    .then(data => {
-        const featuredContainer =
-            document.getElementById("featured");
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("Could not load featured.html");
+        }
+        return response.text();
+    })
+    .then(function (data) {
+        const featuredContainer = document.getElementById("featured");
+
+        if (!featuredContainer) return;
 
         featuredContainer.innerHTML = data;
 
-        let wishlist = JSON.parse(
-            localStorage.getItem("marviqueWishlist") || "[]"
-        );
+        const grid = featuredContainer.querySelector(".featured-grid");
 
-        function updateWishlistCount() {
-            const countElement =
-                document.getElementById("wishlistCount");
+        if (!grid) return;
 
-            if (countElement) {
-                countElement.textContent = wishlist.length;
+        function readWishlist() {
+            try {
+                const saved = JSON.parse(
+                    localStorage.getItem("marviqueWishlist") || "[]"
+                );
+                return Array.isArray(saved) ? saved : [];
+            } catch (error) {
+                return [];
             }
         }
 
-        function renderProducts() {
-            const products = getProducts();
-            console.log("Collections products:", products);
+        function updateWishlistCount() {
+            const countElement = document.getElementById("wishlistCount");
 
-            const grid =
-                featuredContainer.querySelector(".featured-grid");
+            if (countElement) {
+                countElement.textContent = readWishlist().length;
+            }
+        }
 
-            if (!grid) return;
+        function renderProducts(products) {
+            const wishlist = readWishlist();
 
             grid.innerHTML = "";
 
-            products.forEach(function (product) {
+            (products || getProducts()).forEach(function (product) {
                 const card = document.createElement("article");
                 card.className = "product-card";
 
                 const image = document.createElement("div");
                 image.className =
                     "product-image " +
-                    product.category.toLowerCase() + "-image";
+                    String(product.category || "marble").toLowerCase() +
+                    "-image";
+
                 if (product.image) {
-                    image.style.backgroundImage = `url("${product.image}")`;
+                    image.style.backgroundImage =
+                        'url("' +
+                        cloudinaryImageUrl(product.image, 900).replace(/"/g, "%22") +
+                        '")';
                 }
 
                 const category = document.createElement("span");
-                category.textContent = product.category;
+                category.textContent = product.category || "";
                 image.appendChild(category);
 
                 const content = document.createElement("div");
@@ -58,7 +80,7 @@ fetch("sections/featured.html")
                 title.textContent = product.name;
 
                 const description = document.createElement("p");
-                description.textContent = product.description;
+                description.textContent = product.description || "";
 
                 const price = document.createElement("p");
                 price.className = "product-price";
@@ -77,12 +99,14 @@ fetch("sections/featured.html")
                 button.dataset.name = product.name;
                 button.dataset.price = product.price;
 
-                function updateButton() {
-                    const saved = wishlist.some(
-                        item => item.id === product.id
-                    );
+                function isSaved() {
+                    return readWishlist().some(function (item) {
+                        return item.id === product.id;
+                    });
+                }
 
-                    button.textContent = saved
+                function updateButton() {
+                    button.textContent = isSaved()
                         ? "❤️ Added to Wishlist"
                         : "❤️ Wishlist";
                 }
@@ -90,24 +114,23 @@ fetch("sections/featured.html")
                 updateButton();
 
                 button.addEventListener("click", function () {
-                    const alreadyAdded = wishlist.some(
-                        item => item.id === product.id
-                    );
+                    const currentWishlist = readWishlist();
 
-                    if (alreadyAdded) {
+                    if (isSaved()) {
                         alert("This product is already in your Wishlist!");
                         return;
                     }
 
-                    wishlist.push({
+                    currentWishlist.push({
                         id: product.id,
                         name: product.name,
-                        price: Number(product.price)
+                        price: product.price == null ? null : Number(product.price),
+                        image: product.image || ""
                     });
 
                     localStorage.setItem(
                         "marviqueWishlist",
-                        JSON.stringify(wishlist)
+                        JSON.stringify(currentWishlist)
                     );
 
                     updateWishlistCount();
@@ -117,32 +140,17 @@ fetch("sections/featured.html")
                 });
 
                 actions.appendChild(button);
-                content.append(
-                    title,
-                    description,
-                    price,
-                    actions
-                );
+                content.append(title, description, price, actions);
 
                 card.append(image, content);
                 grid.appendChild(card);
-
-                card.addEventListener("mouseenter", function () {
-                    card.style.transform = "translateY(-8px)";
-                });
-
-                card.addEventListener("mouseleave", function () {
-                    card.style.transform = "translateY(0)";
-                });
             });
         }
 
+        onProductsChange(renderProducts);
         updateWishlistCount();
-        renderProducts();
+        initProducts();
     })
-    .catch(error => {
-        console.error(
-            "Featured section loading error:",
-            error
-        );
+    .catch(function (error) {
+        console.error("Featured section loading error:", error);
     });

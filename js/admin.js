@@ -1,9 +1,32 @@
+/* =========================
+   ADMIN PANEL
+   Firebase Auth (admin emails only) + Realtime Database + Cloudinary uploads
+========================= */
 
-import { auth } from "../firebase-config.js";
+import { auth, isAdminEmail } from "../firebase-config.js";
 import {
     signInWithEmailAndPassword,
-    signOut
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+    getProducts,
+    addProduct,
+    initProducts,
+    onProductsChange,
+    seedProductsIfEmpty,
+    isCloudEnabled,
+    getStorageMode
+} from "./products.js";
+
+import {
+    uploadImage,
+    validateImageFile,
+    CloudinaryError
+} from "./cloudinary.js";
+
+import { isCloudinaryConfigured } from "../cloudinary-config.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const adminContainer = document.getElementById("admin");
@@ -37,6 +60,78 @@ document.addEventListener("DOMContentLoaded", function () {
         const dashboard = document.getElementById("adminDashboard");
         const loginMessage = document.getElementById("loginMessage");
         const addProductBtn = document.getElementById("addProductBtn");
+        const storageStatus = document.getElementById("adminStorageStatus");
+        const imageInput = document.getElementById("newProductImage");
+        const imageStatus = document.getElementById("imageStatus");
+        const preview = document.getElementById("imagePreview");
+        const previewImage = document.getElementById("imagePreviewImg");
+
+        let isAdmin = false;
+        let previewUrl = null;
+
+        /* ---------- helpers ---------- */
+
+        function setMessage(element, text, color) {
+            if (!element) return;
+            element.textContent = text;
+            element.style.color = color || "";
+        }
+
+        function updateCounts() {
+            const wishlist = JSON.parse(
+                localStorage.getItem("marviqueWishlist") || "[]"
+            );
+            const favorites = JSON.parse(
+                localStorage.getItem("marviqueFavorites") || "[]"
+            );
+
+            const wishlistCount = document.getElementById("adminWishlistCount");
+            const favoriteCount = document.getElementById("adminFavoriteCount");
+            const productCount = document.getElementById("productCount");
+
+            if (wishlistCount) wishlistCount.textContent = wishlist.length;
+            if (favoriteCount) favoriteCount.textContent = favorites.length;
+            if (productCount) productCount.textContent = getProducts().length;
+        }
+
+        function updateStorageStatus() {
+            if (!storageStatus) return;
+
+            if (isCloudEnabled()) {
+                storageStatus.textContent =
+                    "✓ Connected to Firebase Realtime Database. Changes are live for all visitors.";
+                storageStatus.style.color = "#7ac77a";
+            } else {
+                storageStatus.textContent =
+                    "⚠ Firebase Realtime Database unavailable. Products are saved in this browser only.";
+                storageStatus.style.color = "#e0b25c";
+            }
+
+            if (!isCloudinaryConfigured() && imageStatus) {
+                imageStatus.textContent =
+                    "Cloudinary is not configured yet. Add cloudName and uploadPreset in cloudinary-config.js.";
+                imageStatus.style.color = "#e0b25c";
+            }
+        }
+
+        function resetImagePreview() {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            }
+
+            if (preview) preview.hidden = true;
+            if (previewImage) previewImage.removeAttribute("src");
+            if (imageInput) imageInput.value = "";
+            if (imageStatus) imageStatus.textContent = "";
+        }
+
+        function setBusy(busy, label) {
+            if (!addProductBtn) return;
+
+            addProductBtn.disabled = busy;
+            addProductBtn.textContent = busy ? (label || "Saving...") : "Add Product";
+        }
 
         function showDashboard() {
             if (!loginBox || !dashboard) return;
@@ -44,149 +139,296 @@ document.addEventListener("DOMContentLoaded", function () {
             loginBox.style.display = "none";
             dashboard.style.display = "block";
 
-            const wishlist =
-                JSON.parse(localStorage.getItem("marviqueWishlist")) || [];
-            const favorites =
-                JSON.parse(localStorage.getItem("marviqueFavorites")) || [];
+            updateCounts();
 
-            const wishlistCount =
-                document.getElementById("adminWishlistCount");
-            const favoriteCount =
-                document.getElementById("adminFavoriteCount");
-            const productCount =
-                document.getElementById("productCount");
+            initProducts().then(function () {
+                updateCounts();
+                updateStorageStatus();
 
-            if (wishlistCount) {
-                wishlistCount.textContent = wishlist.length;
-            }
-            if (favoriteCount) {
-                favoriteCount.textContent = favorites.length;
-            }
-            if (productCount && typeof getProducts === "function") {
-                productCount.textContent = getProducts().length;
-            }
-        }
-
-        // Admin Login
-        if (loginBtn) {
-            loginBtn.addEventListener("click", async function () {
-                const email =
-                    document.getElementById("adminUsername").value.trim();
-                const password =
-                    document.getElementById("adminPassword").value;
-
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    localStorage.setItem("marviqueAdmin", "true");
-
-                    if (loginMessage) {
-                        loginMessage.textContent = "Login successful!";
-                        loginMessage.style.color = "green";
-                    }
-
-                    showDashboard();
-                } catch (error) {
-                    console.error("Firebase login error:", error);
-
-                    if (loginMessage) {
-                        loginMessage.textContent =
-                            "Login failed. Check your email and password.";
-                        loginMessage.style.color = "red";
-                    }
+                if (isCloudEnabled()) {
+                    seedProductsIfEmpty()
+                        .then(function (result) {
+                            if (result.seeded) {
+                                console.info("Seeded Firebase with default products.");
+                            }
+                        })
+                        .catch(function (error) {
+                            console.warn("Could not seed products:", error);
+                        });
                 }
             });
         }
 
-        // Admin Logout
+        function showLogin() {
+            if (loginBox) loginBox.style.display = "block";
+            if (dashboard) dashboard.style.display = "none";
+        }
+
+        /* ---------- auth state ---------- */
+
+        onAuthStateChanged(auth, function (user) {
+            if (user && isAdminEmail(user.email)) {
+                isAdmin = true;
+                setMessage(loginMessage, "");
+                showDashboard();
+                return;
+            }
+
+            isAdmin = false;
+            showLogin();
+
+            if (user) {
+                setMessage(
+                    loginMessage,
+                    "This account is not an admin. Sign in with an admin email.",
+                    "red"
+                );
+                signOut(auth).catch(function (error) {
+                    console.error("Sign out error:", error);
+                });
+            }
+        });
+
+        /* ---------- login / logout ---------- */
+
+        if (loginBtn) {
+            loginBtn.addEventListener("click", async function () {
+                const email = document.getElementById("adminUsername").value.trim();
+                const password = document.getElementById("adminPassword").value;
+
+                if (!email || !password) {
+                    setMessage(loginMessage, "Enter your admin email and password.", "red");
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.textContent = "Logging in...";
+
+                try {
+                    const credential = await signInWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+                    if (!isAdminEmail(credential.user.email)) {
+                        await signOut(auth);
+                        setMessage(
+                            loginMessage,
+                            "This account is not an admin.",
+                            "red"
+                        );
+                        return;
+                    }
+
+                    setMessage(loginMessage, "Login successful!", "green");
+                    document.getElementById("adminPassword").value = "";
+                } catch (error) {
+                    console.error("Firebase login error:", error);
+                    setMessage(
+                        loginMessage,
+                        "Login failed. Check your email and password.",
+                        "red"
+                    );
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "Login";
+                }
+            });
+        }
+
         if (logoutBtn) {
             logoutBtn.addEventListener("click", async function () {
                 try {
                     await signOut(auth);
-                    localStorage.removeItem("marviqueAdmin");
-
-                    if (dashboard) dashboard.style.display = "none";
-                    if (loginBox) loginBox.style.display = "block";
+                    isAdmin = false;
+                    setMessage(loginMessage, "Logged out.", "green");
+                    showLogin();
                 } catch (error) {
                     console.error("Logout error:", error);
                 }
             });
         }
 
-        // Add Product
-        if (addProductBtn) {
-            addProductBtn.addEventListener("click", function () {
-                const name =
-                    document.getElementById("newProductName").value.trim();
-                const description =
-                    document.getElementById("newProductDescription").value.trim();
-                const price =
-                    Number(document.getElementById("newProductPrice").value);
-                const category =
-                    document.getElementById("newProductCategory").value;
-                const message =
-                    document.getElementById("productMessage");
+        /* ---------- image preview ---------- */
 
-                if (localStorage.getItem("marviqueAdmin") !== "true") {
-                    if (message) {
-                        message.textContent = "Please log in as admin first.";
-                        message.style.color = "red";
-                    }
+        if (imageInput) {
+            imageInput.addEventListener("change", function () {
+                const file = imageInput.files && imageInput.files[0];
+
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                    previewUrl = null;
+                }
+
+                if (!file) {
+                    if (preview) preview.hidden = true;
+                    if (imageStatus) imageStatus.textContent = "";
                     return;
                 }
 
-                if (!name || !description ||
-                    !Number.isFinite(price) || price < 1) {
-                    if (message) {
-                        message.textContent =
-                            "Please enter a name, description and valid price.";
-                        message.style.color = "red";
-                    }
+                try {
+                    validateImageFile(file);
+                } catch (error) {
+                    setMessage(imageStatus, error.message, "red");
+                    imageInput.value = "";
+                    if (preview) preview.hidden = true;
                     return;
                 }
 
-                if (typeof getProducts !== "function" ||
-                    typeof saveProducts !== "function") {
-                    if (message) {
-                        message.textContent =
-                            "Product functions not found. Check products.js.";
-                        message.style.color = "red";
-                    }
-                    return;
-                }
+                previewUrl = URL.createObjectURL(file);
 
-                const products = getProducts();
-                products.push({
-                    id: "product-" + Date.now(),
-                    name: name,
-                    description: description,
-                    price: price,
-                    category: category
-                });
+                if (previewImage) previewImage.src = previewUrl;
+                if (preview) preview.hidden = false;
 
-                saveProducts(products);
-
-                document.getElementById("newProductName").value = "";
-                document.getElementById("newProductDescription").value = "";
-                document.getElementById("newProductPrice").value = "";
-
-                if (message) {
-                    message.textContent =
-                        "Product saved! Refresh the page to view changes.";
-                    message.style.color = "green";
-                }
-
-                const count = document.getElementById("productCount");
-                if (count) count.textContent = products.length;
-
-                document.dispatchEvent(
-                    new CustomEvent("marviqueProductsUpdated")
+                setMessage(
+                    imageStatus,
+                    file.name + " — " + (file.size / 1024 / 1024).toFixed(2) + " MB",
+                    "#aaa39a"
                 );
             });
         }
 
-        // Restore existing local session display
-        if (localStorage.getItem("marviqueAdmin") === "true") {
-            showDashboard();
+        /* ---------- live product count ---------- */
+
+        onProductsChange(function () {
+            const productCount = document.getElementById("productCount");
+
+            if (productCount) {
+                productCount.textContent = getProducts().length;
+            }
+        });
+
+        /* ---------- add product ---------- */
+
+        if (addProductBtn) {
+            addProductBtn.addEventListener("click", async function () {
+                if (!isAdmin) {
+                    setMessage(
+                        document.getElementById("productMessage"),
+                        "Please log in as admin first.",
+                        "red"
+                    );
+                    return;
+                }
+
+                const name = document.getElementById("newProductName").value.trim();
+                const description = document
+                    .getElementById("newProductDescription")
+                    .value.trim();
+                const priceValue = document.getElementById("newProductPrice").value;
+                const category = document.getElementById("newProductCategory").value;
+                const file = imageInput && imageInput.files && imageInput.files[0];
+                const message = document.getElementById("productMessage");
+
+                if (!name) {
+                    setMessage(message, "Please enter a product name.", "red");
+                    return;
+                }
+
+                let price = null;
+
+                if (priceValue !== "") {
+                    price = Number(priceValue);
+
+                    if (!Number.isFinite(price) || price <= 0) {
+                        setMessage(message, "Please enter a valid price or leave it empty.", "red");
+                        return;
+                    }
+                }
+
+                setBusy(true, "Saving...");
+                setMessage(message, "");
+
+                try {
+                    let imageUrl = "";
+
+                    if (file) {
+                        if (!isCloudinaryConfigured()) {
+                            throw new CloudinaryError(
+                                "Cloudinary is not configured. Add cloudName and uploadPreset in cloudinary-config.js.",
+                                "cloudinary/not-configured"
+                            );
+                        }
+
+                        setBusy(true, "Uploading image...");
+                        setMessage(imageStatus, "Uploading image to Cloudinary...", "#c8a96b");
+
+                        const uploaded = await uploadImage(file, {
+                            onProgress: function (percent) {
+                                setBusy(true, "Uploading " + percent + "%...");
+                                setMessage(
+                                    imageStatus,
+                                    "Uploading image... " + percent + "%",
+                                    "#c8a96b"
+                                );
+                            }
+                        });
+
+                        imageUrl = uploaded.url;
+                        setMessage(imageStatus, "Image uploaded ✓", "green");
+                    }
+
+                    const product = {
+                        id: "product-" + Date.now(),
+                        name: name,
+                        description: description,
+                        price: price,
+                        category: category,
+                        image: imageUrl,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    setBusy(true, "Saving...");
+
+                    const result = await addProduct(product);
+
+                    document.getElementById("newProductName").value = "";
+                    document.getElementById("newProductDescription").value = "";
+                    document.getElementById("newProductPrice").value = "";
+                    resetImagePreview();
+
+                    if (result.savedToCloud) {
+                        setMessage(
+                            message,
+                            "Product added and synced to Firebase. It is live for all visitors.",
+                            "green"
+                        );
+                    } else {
+                        setMessage(
+                            message,
+                            "Product saved in this browser only — Firebase sync failed. Check your Realtime Database and rules.",
+                            "#e0b25c"
+                        );
+                    }
+
+                    updateStorageStatus();
+                } catch (error) {
+                    console.error("Add product error:", error);
+
+                    if (error instanceof CloudinaryError) {
+                        setMessage(message, error.message, "red");
+                        setMessage(imageStatus, error.message, "red");
+                    } else {
+                        setMessage(
+                            message,
+                            "Could not add product: " + error.message,
+                            "red"
+                        );
+                    }
+                } finally {
+                    setBusy(false);
+                }
+            });
+        }
+
+        /* ---------- initial state ---------- */
+
+        updateStorageStatus();
+        updateCounts();
+
+        if (getStorageMode() === "local") {
+            initProducts().then(updateStorageStatus);
         }
     }
 });

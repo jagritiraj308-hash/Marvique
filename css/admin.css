@@ -65,6 +65,111 @@
     font-weight: bold;
 }
 
+.admin-storage {
+    font-size: 13px;
+    margin: -10px 0 10px;
+    line-height: 1.5;
+}
+
+.admin-product-form {
+    margin: 30px 0;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-product-form h3 {
+    margin-bottom: 20px;
+}
+
+.admin-field {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.admin-field span {
+    display: block;
+    margin-bottom: 6px;
+    color: #aaa39a;
+    font-size: 13px;
+}
+
+.admin-field input,
+.admin-field textarea,
+.admin-field select {
+    width: 100%;
+    padding: 13px;
+    background: #0c0b0a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-field textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.admin-field input[type="file"] {
+    padding: 10px;
+    color: #aaa39a;
+    cursor: pointer;
+}
+
+.admin-field input:focus,
+.admin-field textarea:focus,
+.admin-field select:focus {
+    outline: none;
+    border-color: #c8a96b;
+}
+
+.admin-image-preview {
+    max-width: 220px;
+    margin: 10px 0 15px;
+    background: #0c0b0a;
+    border: 1px solid rgba(200, 169, 107, 0.4);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-image-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.admin-hint {
+    min-height: 18px;
+    margin-bottom: 15px;
+    color: #aaa39a;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#addProductBtn {
+    padding: 12px 25px;
+    background: #c8a96b;
+    color: #0c0b0a;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#addProductBtn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+#productMessage {
+    min-height: 18px;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
 @media (max-width: 768px) {
 
     .dashboard-cards {

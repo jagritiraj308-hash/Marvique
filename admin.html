@@ -1,4 +1,4 @@
- <section class="admin section" id="adminPanel"></section>
+<section class="admin section" id="adminPanel">
 
     <div class="container">
 
@@ -20,14 +20,16 @@
             <h3>Admin Login</h3>
 
             <input
-                type="text"
+                type="email"
                 id="adminUsername"
-                placeholder="Username">
+                placeholder="Admin email"
+                autocomplete="username">
 
             <input
                 type="password"
                 id="adminPassword"
-                placeholder="Password">
+                placeholder="Password"
+                autocomplete="current-password">
 
             <button id="loginBtn">
                 Login
@@ -44,6 +46,8 @@
             style="display:none;">
 
             <h3>Dashboard</h3>
+
+            <p class="admin-storage" id="adminStorageStatus"></p>
 
             <div class="dashboard-cards">
 
@@ -64,40 +68,68 @@
 
             </div>
 
-             
-<!-- ADD PRODUCT FORM -->
-<div class="admin-product-form">
 
-    <h3>Add New Product</h3>
+            <!-- ADD PRODUCT FORM -->
+            <div class="admin-product-form">
 
-    <input
-        type="text"
-        id="newProductName"
-        placeholder="Product name">
+                <h3>Add New Product</h3>
 
-    <textarea
-        id="newProductDescription"
-        placeholder="Product description"></textarea>
+                <label class="admin-field" for="newProductName">
+                    <span>Product name</span>
+                    <input
+                        type="text"
+                        id="newProductName"
+                        placeholder="e.g. K 6210 Statuario"
+                        autocomplete="off">
+                </label>
 
-    <input
-        type="number"
-        id="newProductPrice"
-        placeholder="Price per sq.ft"
-        min="1">
+                <label class="admin-field" for="newProductDescription">
+                    <span>Description</span>
+                    <textarea
+                        id="newProductDescription"
+                        placeholder="Finish, size, usage..."></textarea>
+                </label>
 
-    <select id="newProductCategory">
-        <option value="MARBLE">Marble</option>
-        <option value="PORCELAIN">Porcelain</option>
-        <option value="CERAMIC">Ceramic</option>
-    </select>
+                <label class="admin-field" for="newProductPrice">
+                    <span>Price per sq.ft (leave empty for "Price on Request")</span>
+                    <input
+                        type="number"
+                        id="newProductPrice"
+                        placeholder="e.g. 2500"
+                        min="1">
+                </label>
 
-    <button type="button" id="addProductBtn">
-        Add Product
-    </button>
+                <label class="admin-field" for="newProductCategory">
+                    <span>Category</span>
+                    <select id="newProductCategory">
+                        <option value="MARBLE">Marble</option>
+                        <option value="PORCELAIN">Porcelain</option>
+                        <option value="CERAMIC">Ceramic</option>
+                        <option value="VITRIFIED">Vitrified</option>
+                    </select>
+                </label>
 
-    <p id="productMessage"></p>
+                <label class="admin-field" for="newProductImage">
+                    <span>Product image (JPG, PNG, WebP or AVIF)</span>
+                    <input
+                        type="file"
+                        id="newProductImage"
+                        accept="image/jpeg,image/png,image/webp,image/avif">
+                </label>
 
-</div>
+                <div class="admin-image-preview" id="imagePreview" hidden>
+                    <img id="imagePreviewImg" alt="Selected product image">
+                </div>
+
+                <p class="admin-hint" id="imageStatus"></p>
+
+                <button type="button" id="addProductBtn">
+                    Add Product
+                </button>
+
+                <p id="productMessage"></p>
+
+            </div>
 
             <button id="logoutBtn">
                 Logout

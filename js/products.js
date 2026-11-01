@@ -1,5 +1,20 @@
+/* =========================
+   PRODUCTS STORE
+   Firebase Realtime Database with localStorage fallback.
+========================= */
 
-const defaultProducts = [
+import { db } from "../firebase-config.js";
+import {
+    ref,
+    get,
+    set,
+    onValue
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+const STORAGE_KEY = "marviqueProducts";
+const DB_PATH = "products";
+
+export const defaultProducts = [
     {
         id: "k6201",
         name: "K 6201",
@@ -122,67 +137,273 @@ const defaultProducts = [
     }
 ];
 
+let cachedProducts = null;
+let storageMode = "local";
+let initPromise = null;
 
+const listeners = new Set();
 
-function getProducts() {
-    const savedProducts = localStorage.getItem("marviqueProducts");
+/* ---------- helpers ---------- */
 
-    if (savedProducts !== null) {
+function notifyListeners() {
+    listeners.forEach(function (listener) {
         try {
-            const parsedProducts = JSON.parse(savedProducts);
+            listener(getProducts(), storageMode);
+        } catch (error) {
+            console.error("Products listener failed:", error);
+        }
+    });
+}
 
-            if (Array.isArray(parsedProducts) && parsedProducts.length > 0) {
+function normalizeProducts(value) {
+    if (!value) return [];
+
+    const items = Array.isArray(value) ? value : Object.values(value);
+
+    return items
+        .filter(function (item) {
+            return item && typeof item === "object" && item.id;
+        })
+        .map(function (item) {
+            return Object.assign({}, item, {
+                price: item.price == null || item.price === "" ? null : Number(item.price)
+            });
+        });
+}
+
+function keyedById(products) {
+    return products.reduce(function (result, product) {
+        result[product.id] = product;
+        return result;
+    }, {});
+}
+
+function readLocalProducts() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (saved !== null) {
+        try {
+            const parsed = JSON.parse(saved);
+
+            if (Array.isArray(parsed) && parsed.length > 0) {
                 const defaultIds = new Set(
-                    defaultProducts.map(product => product.id)
+                    defaultProducts.map(function (product) { return product.id; })
                 );
 
-                const savedDefaults = parsedProducts.filter(
-                    product => defaultIds.has(product.id)
-                );
-
-                const otherProducts = parsedProducts.filter(
-                    product => !defaultIds.has(product.id)
-                );
-
-                const mergedDefaults = defaultProducts.map(product => {
-                    const saved = savedDefaults.find(
-                        item => item.id === product.id
-                    );
-
-                    return saved ? { ...product, ...saved } : product;
+                const savedDefaults = parsed.filter(function (product) {
+                    return defaultIds.has(product.id);
                 });
 
-                const mergedProducts = [...mergedDefaults, ...otherProducts];
+                const otherProducts = parsed.filter(function (product) {
+                    return !defaultIds.has(product.id);
+                });
 
-                localStorage.setItem(
-                    "marviqueProducts",
-                    JSON.stringify(mergedProducts)
-                );
+                const mergedDefaults = defaultProducts.map(function (product) {
+                    const savedProduct = savedDefaults.find(function (item) {
+                        return item.id === product.id;
+                    });
 
-                return mergedProducts;
+                    return savedProduct
+                        ? Object.assign({}, product, savedProduct)
+                        : product;
+                });
+
+                return mergedDefaults.concat(otherProducts);
             }
         } catch (error) {
             console.error("Saved products could not be read:", error);
         }
     }
 
-    localStorage.setItem(
-        "marviqueProducts",
-        JSON.stringify(defaultProducts)
-    );
-
-    return defaultProducts;
+    return defaultProducts.slice();
 }
 
-function saveProducts(products) {
-    localStorage.setItem("marviqueProducts", JSON.stringify(products));
+function writeLocalProducts(products) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    } catch (error) {
+        console.warn("Products could not be cached locally:", error);
+    }
 }
 
-
-function saveProducts(products) {
-    localStorage.setItem(
-        "marviqueProducts",
-        JSON.stringify(products)
-    );
+function setCache(products) {
+    cachedProducts = products;
+    writeLocalProducts(products);
+    notifyListeners();
 }
 
+/* ---------- public API ---------- */
+
+export function getProducts() {
+    if (!cachedProducts) {
+        cachedProducts = readLocalProducts();
+    }
+
+    return cachedProducts;
+}
+
+export function getStorageMode() {
+    return storageMode;
+}
+
+export function isCloudEnabled() {
+    return storageMode === "cloud";
+}
+
+/**
+ * Subscribes to product changes. The callback runs immediately and again
+ * whenever products change locally or in the Realtime Database.
+ * Returns an unsubscribe function.
+ */
+export function onProductsChange(listener) {
+    listeners.add(listener);
+    listener(getProducts(), storageMode);
+
+    return function () {
+        listeners.delete(listener);
+    };
+}
+
+/**
+ * Connects to the Realtime Database. Falls back to localStorage when the
+ * database is unreachable (not created yet, rules block reads, offline).
+ */
+export function initProducts() {
+    if (initPromise) return initPromise;
+
+    getProducts();
+
+    initPromise = new Promise(function (resolve) {
+        let resolved = false;
+
+        function finish() {
+            if (resolved) return;
+            resolved = true;
+            resolve(getProducts());
+        }
+
+        try {
+            const productsRef = ref(db, DB_PATH);
+
+            onValue(
+                productsRef,
+                function (snapshot) {
+                    const remoteProducts = normalizeProducts(snapshot.val());
+
+                    storageMode = "cloud";
+
+                    if (remoteProducts.length > 0) {
+                        cachedProducts = remoteProducts;
+                        writeLocalProducts(remoteProducts);
+                    }
+
+                    notifyListeners();
+                    finish();
+                },
+                function (error) {
+                    console.warn(
+                        "Realtime Database unavailable. Using localStorage instead.",
+                        error
+                    );
+
+                    storageMode = "local";
+                    notifyListeners();
+                    finish();
+                }
+            );
+        } catch (error) {
+            console.warn(
+                "Realtime Database could not be initialised. Using localStorage instead.",
+                error
+            );
+
+            storageMode = "local";
+            finish();
+        }
+    });
+
+    return initPromise;
+}
+
+/**
+ * Copies the current products into an empty database.
+ * Called after admin login so first-time setup is automatic.
+ */
+export async function seedProductsIfEmpty() {
+    if (storageMode !== "cloud") {
+        return { seeded: false, reason: "local-only" };
+    }
+
+    const snapshot = await get(ref(db, DB_PATH));
+    const remoteProducts = normalizeProducts(snapshot.val());
+
+    if (remoteProducts.length > 0) {
+        return { seeded: false, reason: "already-populated" };
+    }
+
+    await set(ref(db, DB_PATH), keyedById(getProducts()));
+
+    return { seeded: true };
+}
+
+/**
+ * Adds (or replaces) a product. Always writes to localStorage, and writes to
+ * the Realtime Database when it is available.
+ */
+export async function addProduct(product) {
+    const products = getProducts();
+    const exists = products.some(function (item) {
+        return item.id === product.id;
+    });
+
+    const nextProducts = exists
+        ? products.map(function (item) {
+            return item.id === product.id ? product : item;
+        })
+        : products.concat(product);
+
+    setCache(nextProducts);
+
+    if (storageMode !== "cloud") {
+        return { savedToCloud: false };
+    }
+
+    try {
+        await seedProductsIfEmpty();
+        await set(ref(db, DB_PATH + "/" + product.id), product);
+        return { savedToCloud: true };
+    } catch (error) {
+        console.error("Product could not be saved to Firebase:", error);
+        return { savedToCloud: false, error: error };
+    }
+}
+
+/**
+ * Removes a product from localStorage and the Realtime Database.
+ */
+export async function deleteProduct(productId) {
+    const nextProducts = getProducts().filter(function (item) {
+        return item.id !== productId;
+    });
+
+    setCache(nextProducts);
+
+    if (storageMode !== "cloud") {
+        return { deletedFromCloud: false };
+    }
+
+    try {
+        await set(ref(db, DB_PATH + "/" + productId), null);
+        return { deletedFromCloud: true };
+    } catch (error) {
+        console.error("Product could not be deleted from Firebase:", error);
+        return { deletedFromCloud: false, error: error };
+    }
+}
+
+/**
+ * Kept for backwards compatibility with older code.
+ */
+export function saveProducts(products) {
+    setCache(products);
+}
