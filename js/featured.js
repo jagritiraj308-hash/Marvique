@@ -1,4 +1,4 @@
- 
+
 /* =========================
    FEATURED COLLECTION
 ========================= */
@@ -26,6 +26,7 @@ fetch("sections/featured.html")
 
         function renderProducts() {
             const products = getProducts();
+            console.log("Collections products:", products);
 
             const grid =
                 featuredContainer.querySelector(".featured-grid");
@@ -42,6 +43,9 @@ fetch("sections/featured.html")
                 image.className =
                     "product-image " +
                     product.category.toLowerCase() + "-image";
+                if (product.image) {
+                    image.style.backgroundImage = `url("${product.image}")`;
+                }
 
                 const category = document.createElement("span");
                 category.textContent = product.category;
@@ -58,9 +62,11 @@ fetch("sections/featured.html")
 
                 const price = document.createElement("p");
                 price.className = "product-price";
+
                 price.textContent =
-                    "₹" + Number(product.price).toLocaleString("en-IN") +
-                    " / sq.ft";
+                    product.price != null && product.price !== ""
+                        ? "₹" + Number(product.price).toLocaleString("en-IN") + " / sq.ft"
+                        : "Price on Request";
 
                 const actions = document.createElement("div");
                 actions.className = "product-actions";

@@ -1,4 +1,10 @@
- 
+
+import { auth } from "../firebase-config.js";
+import {
+    signInWithEmailAndPassword,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 document.addEventListener("DOMContentLoaded", function () {
     const adminContainer = document.getElementById("admin");
 
@@ -7,8 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // Load Admin Panel HTML
-    fetch("sections/admin.html")
+    fetch("admin.html")
         .then(function (response) {
             if (!response.ok) {
                 throw new Error("Could not load admin.html");
@@ -41,17 +46,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const wishlist =
                 JSON.parse(localStorage.getItem("marviqueWishlist")) || [];
-
             const favorites =
                 JSON.parse(localStorage.getItem("marviqueFavorites")) || [];
 
-            const wishlistCount = document.getElementById("adminWishlistCount");
-            const favoriteCount = document.getElementById("adminFavoriteCount");
-            const productCount = document.getElementById("productCount");
+            const wishlistCount =
+                document.getElementById("adminWishlistCount");
+            const favoriteCount =
+                document.getElementById("adminFavoriteCount");
+            const productCount =
+                document.getElementById("productCount");
 
-            if (wishlistCount) wishlistCount.textContent = wishlist.length;
-            if (favoriteCount) favoriteCount.textContent = favorites.length;
-
+            if (wishlistCount) {
+                wishlistCount.textContent = wishlist.length;
+            }
+            if (favoriteCount) {
+                favoriteCount.textContent = favorites.length;
+            }
             if (productCount && typeof getProducts === "function") {
                 productCount.textContent = getProducts().length;
             }
@@ -59,31 +69,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Admin Login
         if (loginBtn) {
-            loginBtn.addEventListener("click", function () {
-                const username =
+            loginBtn.addEventListener("click", async function () {
+                const email =
                     document.getElementById("adminUsername").value.trim();
-
                 const password =
                     document.getElementById("adminPassword").value;
 
-                if (username === "admin" && password === "12345") {
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
                     localStorage.setItem("marviqueAdmin", "true");
+
+                    if (loginMessage) {
+                        loginMessage.textContent = "Login successful!";
+                        loginMessage.style.color = "green";
+                    }
+
                     showDashboard();
-                } else if (loginMessage) {
-                    loginMessage.textContent =
-                        "Invalid username or password.";
-                    loginMessage.style.color = "red";
+                } catch (error) {
+                    console.error("Firebase login error:", error);
+
+                    if (loginMessage) {
+                        loginMessage.textContent =
+                            "Login failed. Check your email and password.";
+                        loginMessage.style.color = "red";
+                    }
                 }
             });
         }
 
         // Admin Logout
         if (logoutBtn) {
-            logoutBtn.addEventListener("click", function () {
-                localStorage.removeItem("marviqueAdmin");
+            logoutBtn.addEventListener("click", async function () {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem("marviqueAdmin");
 
-                if (dashboard) dashboard.style.display = "none";
-                if (loginBox) loginBox.style.display = "block";
+                    if (dashboard) dashboard.style.display = "none";
+                    if (loginBox) loginBox.style.display = "block";
+                } catch (error) {
+                    console.error("Logout error:", error);
+                }
             });
         }
 
@@ -92,20 +117,16 @@ document.addEventListener("DOMContentLoaded", function () {
             addProductBtn.addEventListener("click", function () {
                 const name =
                     document.getElementById("newProductName").value.trim();
-
                 const description =
                     document.getElementById("newProductDescription").value.trim();
-
                 const price =
                     Number(document.getElementById("newProductPrice").value);
-
                 const category =
                     document.getElementById("newProductCategory").value;
+                const message =
+                    document.getElementById("productMessage");
 
-                const message = document.getElementById("productMessage");
-
-                if (!localStorage.getItem("marviqueAdmin") ||
-                    localStorage.getItem("marviqueAdmin") !== "true") {
+                if (localStorage.getItem("marviqueAdmin") !== "true") {
                     if (message) {
                         message.textContent = "Please log in as admin first.";
                         message.style.color = "red";
@@ -113,7 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     return;
                 }
 
-                if (!name || !description || !Number.isFinite(price) || price < 1) {
+                if (!name || !description ||
+                    !Number.isFinite(price) || price < 1) {
                     if (message) {
                         message.textContent =
                             "Please enter a name, description and valid price.";
@@ -133,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 const products = getProducts();
-
                 products.push({
                     id: "product-" + Date.now(),
                     name: name,
@@ -157,14 +178,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const count = document.getElementById("productCount");
                 if (count) count.textContent = products.length;
 
-                // Notify Featured section if it supports product refresh
                 document.dispatchEvent(
                     new CustomEvent("marviqueProductsUpdated")
                 );
             });
         }
 
-        // Restore admin session
+        // Restore existing local session display
         if (localStorage.getItem("marviqueAdmin") === "true") {
             showDashboard();
         }
