@@ -20,131 +20,46 @@
         </div>
 
 
-        <div class="featured-grid">
+        <div class="collection-toolbar">
 
-            <!-- PRODUCT 1 -->
+            <div
+                class="collection-filters"
+                id="collectionFilters"
+                role="group"
+                aria-label="Filter products by category">
 
-            <article class="product-card">
+                <button
+                    type="button"
+                    class="filter-chip is-active"
+                    data-filter="all">
+                    All
+                </button>
 
-                <div class="product-image marble-image">
-                    <span>MARBLE</span>
-                </div>
+            </div>
 
-                <div class="product-content">
-
-                    <h3>Luxury Marble</h3>
-
-                    <p>
-                        Elegant natural marble with unique patterns
-                        and timeless character.
-                    </p>
-
-                    <p class="product-price">
-                        ₹2,500 / sq.ft
-                    </p>
-
-                    <div class="product-actions">
-
-                        <button
-                            class="wishlist-btn"
-                            data-id="marble-01"
-                            data-name="Luxury Marble"
-                            data-price="2500">
-
-                            ❤️ Wishlist
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </article>
-
-
-            <!-- PRODUCT 2 -->
-
-            <article class="product-card">
-
-                <div class="product-image porcelain-image">
-                    <span>PORCELAIN</span>
-                </div>
-
-                <div class="product-content">
-
-                    <h3>Porcelain Tiles</h3>
-
-                    <p>
-                        Durable and sophisticated porcelain surfaces
-                        for modern interiors.
-                    </p>
-
-                    <p class="product-price">
-                        ₹1,800 / sq.ft
-                    </p>
-
-                    <div class="product-actions">
-
-                        <button
-                            class="wishlist-btn"
-                            data-id="porcelain-01"
-                            data-name="Porcelain Tiles"
-                            data-price="1800">
-
-                            ❤️ Wishlist
-
-                        </button>
-
-                        
-                    </div>
-
-                </div>
-
-            </article>
-
-
-            <!-- PRODUCT 3 -->
-
-            <article class="product-card">
-
-                <div class="product-image ceramic-image">
-                    <span>CERAMIC</span>
-                </div>
-
-                <div class="product-content">
-
-                    <h3>Ceramic Tiles</h3>
-
-                    <p>
-                        Versatile ceramic designs created for
-                        beautiful everyday living.
-                    </p>
-
-                    <p class="product-price">
-                        ₹1,200 / sq.ft
-                    </p>
-
-                    <div class="product-actions">
-
-                        <button
-                            class="wishlist-btn"
-                            data-id="ceramic-01"
-                            data-name="Ceramic Tiles"
-                            data-price="1200">
-
-                            ❤️ Wishlist
-
-                        </button>
-
-                        
-
-                    </div>
-
-                </div>
-
-            </article>
+            <label class="collection-search" for="productSearch">
+                <span class="sr-only">Search products</span>
+                <input
+                    type="search"
+                    id="productSearch"
+                    placeholder="Search products…"
+                    autocomplete="off">
+            </label>
 
         </div>
+
+        <p class="collection-count" id="collectionCount" aria-live="polite"></p>
+
+
+        <div class="featured-grid" id="featuredGrid">
+
+            <p class="collection-loading">Loading products…</p>
+
+        </div>
+
+        <p class="collection-empty" id="collectionEmpty" hidden>
+            No products match your search. Try a different keyword or category.
+        </p>
 
     </div>
 

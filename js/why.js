@@ -2,35 +2,34 @@
    WHY MARVIQUE
 ========================= */
 
-fetch("sections/why.html")
-    .then(response => response.text())
-    .then(data => {
+fetch("sections/why.html?v=20261106")
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("Could not load why.html");
+        }
+        return response.text();
+    })
+    .then(function (data) {
+        const host = document.getElementById("why-container");
 
-        document.getElementById("why").innerHTML = data;
+        if (!host) return;
 
-        const cards = document.querySelectorAll(".why-card");
+        host.innerHTML = data;
 
-        cards.forEach(function (card) {
+        host.querySelectorAll(".why-card").forEach(function (card) {
+            const icon = card.querySelector(".why-icon");
+
+            if (!icon) return;
 
             card.addEventListener("mouseenter", function () {
-
-                const icon = card.querySelector(".why-icon");
-
                 icon.style.transform = "rotate(10deg)";
-
             });
 
             card.addEventListener("mouseleave", function () {
-
-                const icon = card.querySelector(".why-icon");
-
                 icon.style.transform = "rotate(0deg)";
-
             });
-
         });
-
     })
-    .catch(error => {
+    .catch(function (error) {
         console.error("Why section loading error:", error);
     });

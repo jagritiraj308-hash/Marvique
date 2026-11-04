@@ -2,20 +2,26 @@
    FOOTER
 ========================= */
 
-fetch("sections/footer.html")
-    .then(response => response.text())
-    .then(data => {
+fetch("sections/footer.html?v=20261107")
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("Could not load footer.html");
+        }
+        return response.text();
+    })
+    .then(function (data) {
+        const host = document.getElementById("footer");
 
-        document.getElementById("footer").innerHTML = data;
+        if (!host) return;
 
-        const year =
-            document.getElementById("currentYear");
+        host.innerHTML = data;
+
+        const year = host.querySelector("#currentYear");
 
         if (year) {
             year.textContent = new Date().getFullYear();
         }
-
     })
-    .catch(error => {
+    .catch(function (error) {
         console.error("Footer loading error:", error);
     });

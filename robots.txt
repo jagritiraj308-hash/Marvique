@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin-panel.html
+Disallow: /admin.html
+Disallow: /login.html
+Disallow: /signup.html
+
+Sitemap: https://marvique-8c867.web.app/sitemap.xml

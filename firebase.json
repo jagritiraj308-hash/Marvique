@@ -2,6 +2,9 @@
   "database": {
     "rules": "database.rules.json"
   },
+  "functions": {
+    "source": "functions"
+  },
   "hosting": {
     "public": ".",
     "ignore": [
@@ -12,6 +15,7 @@
       "**/.*/**",
       ".git/**",
       ".firebase/**",
+      "functions/**",
       "**/node_modules/**",
       "*.md",
       "README.txt"

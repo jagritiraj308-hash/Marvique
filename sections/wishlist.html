@@ -12,15 +12,30 @@
                 My <span>Wishlist</span>
             </h2>
 
+            <p>
+                Keep your favourite surfaces in one place and
+                compare them when you visit the showroom.
+            </p>
+
         </div>
 
-        <div id="wishlistItems" class="saved-products">
+        <div
+            id="wishlistGrid"
+            class="featured-grid saved-products"
+            aria-live="polite">
+        </div>
 
-            <!-- Products will appear here -->
+        <div class="wishlist-empty" id="wishlistEmpty" hidden>
+
+            <p>Your wishlist is empty.</p>
+
+            <a href="#featured" class="btn primary-btn">
+                Browse Collection
+            </a>
 
         </div>
 
-        <button id="clearWishlist" class="clear-btn">
+        <button id="clearWishlist" class="clear-btn" type="button" hidden>
             Clear Wishlist
         </button>
 

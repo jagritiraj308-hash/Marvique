@@ -1,0 +1,14 @@
+{
+  "name": "marvique-functions",
+  "description": "Razorpay payment functions for Marvique Tiles & Marble",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.1.0",
+    "razorpay": "^2.9.4"
+  }
+}

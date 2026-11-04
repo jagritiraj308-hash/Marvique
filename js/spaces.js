@@ -2,27 +2,30 @@
    SPACES
 ========================= */
 
-fetch("sections/spaces.html")
-    .then(response => response.text())
-    .then(data => {
-
-        document.getElementById("spaces").innerHTML = data;
-
-        const spaces = document.querySelectorAll(".space-card");
-
-        spaces.forEach(function (space) {
-
-            space.addEventListener("click", function () {
-
-                const title = space.querySelector("h3").textContent;
-
-                console.log("Selected space:", title);
-
-            });
-
-        });
-
+fetch("sections/spaces.html?v=20261106")
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("Could not load spaces.html");
+        }
+        return response.text();
     })
-    .catch(error => {
+    .then(function (data) {
+        const host = document.getElementById("spaces-container");
+
+        if (!host) return;
+
+        host.innerHTML = data;
+
+        host.querySelectorAll(".space-card").forEach(function (space) {
+            space.addEventListener("click", function () {
+                const title = space.querySelector("h3");
+
+                if (title) {
+                    console.log("Selected space:", title.textContent);
+                }
+            });
+        });
+    })
+    .catch(function (error) {
         console.error("Spaces section loading error:", error);
     });

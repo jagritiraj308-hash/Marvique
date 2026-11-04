@@ -27,6 +27,7 @@ import {
 } from "./cloudinary.js";
 
 import { isCloudinaryConfigured } from "../cloudinary-config.js";
+import { subscribeToOrders } from "./orders.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const adminContainer = document.getElementById("admin");
@@ -50,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(function (error) {
             console.error("Admin loading error:", error);
             adminContainer.innerHTML =
-                "<p>Admin Panel load nahi hua. Live Server check karo.</p>";
+                "<p>Admin panel could not load. Refresh the page and try again.</p>";
         });
 
     function initializeAdmin() {
@@ -65,9 +66,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const imageStatus = document.getElementById("imageStatus");
         const preview = document.getElementById("imagePreview");
         const previewImage = document.getElementById("imagePreviewImg");
+        const orderCount = document.getElementById("orderCount");
+        const orderList = document.getElementById("adminOrderList");
 
         let isAdmin = false;
         let previewUrl = null;
+        let unsubscribeOrders = null;
 
         /* ---------- helpers ---------- */
 
@@ -114,6 +118,103 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        function formatAmount(paise) {
+            return "₹" + (Number(paise || 0) / 100).toLocaleString("en-IN", {
+                maximumFractionDigits: 2
+            });
+        }
+
+        function renderOrders(orders, error) {
+            if (orderCount) {
+                orderCount.textContent = orders.length;
+            }
+
+            if (!orderList) return;
+
+            orderList.innerHTML = "";
+
+            if (error) {
+                const message = document.createElement("p");
+                message.className = "admin-order-empty";
+                message.textContent =
+                    "Orders could not be loaded. Deploy the updated database rules.";
+                orderList.appendChild(message);
+                return;
+            }
+
+            if (!orders.length) {
+                const message = document.createElement("p");
+                message.className = "admin-order-empty";
+                message.textContent = "No orders yet.";
+                orderList.appendChild(message);
+                return;
+            }
+
+            const statusLabels = {
+                paid: "PAID",
+                authorized: "AUTHORIZED",
+                created: "PENDING",
+                failed: "FAILED"
+            };
+
+            orders.slice(0, 50).forEach(function (order) {
+                const status = String(order.status || "created").toLowerCase();
+
+                const card = document.createElement("article");
+                card.className = "admin-order";
+
+                const head = document.createElement("div");
+                head.className = "admin-order-head";
+
+                const title = document.createElement("strong");
+                title.textContent = order.productName || order.productId || "Product";
+
+                const badge = document.createElement("span");
+                badge.className =
+                    "admin-order-status admin-order-status--" + status;
+                badge.textContent = statusLabels[status] || status.toUpperCase();
+
+                head.append(title, badge);
+
+                const details = document.createElement("p");
+                details.className = "admin-order-meta";
+                details.textContent =
+                    (order.quantity || 0) +
+                    " sq.ft × ₹" +
+                    Number(order.unitPrice || 0).toLocaleString("en-IN") +
+                    " = " +
+                    formatAmount(order.amount);
+
+                const customer = document.createElement("p");
+                customer.className = "admin-order-customer";
+
+                const customerName =
+                    order.customer && order.customer.name
+                        ? order.customer.name
+                        : "Unknown customer";
+                const customerPhone =
+                    order.customer && order.customer.phone
+                        ? " · " + order.customer.phone
+                        : "";
+
+                customer.textContent = customerName + customerPhone;
+
+                const footer = document.createElement("p");
+                footer.className = "admin-order-meta admin-order-footer";
+
+                const created = order.createdAt
+                    ? new Date(Number(order.createdAt)).toLocaleString("en-IN")
+                    : "";
+
+                footer.textContent =
+                    created +
+                    (order.paymentId ? " · " + order.paymentId : "");
+
+                card.append(head, details, customer, footer);
+                orderList.appendChild(card);
+            });
+        }
+
         function resetImagePreview() {
             if (previewUrl) {
                 URL.revokeObjectURL(previewUrl);
@@ -140,6 +241,10 @@ document.addEventListener("DOMContentLoaded", function () {
             dashboard.style.display = "block";
 
             updateCounts();
+
+            if (!unsubscribeOrders) {
+                unsubscribeOrders = subscribeToOrders(renderOrders);
+            }
 
             initProducts().then(function () {
                 updateCounts();
@@ -242,6 +347,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 try {
                     await signOut(auth);
                     isAdmin = false;
+
+                    if (unsubscribeOrders) {
+                        unsubscribeOrders();
+                        unsubscribeOrders = null;
+                    }
+
+                    if (orderList) {
+                        orderList.innerHTML =
+                            '<p class="admin-order-empty">Log in as admin to load orders.</p>';
+                    }
+
+                    if (orderCount) {
+                        orderCount.textContent = "0";
+                    }
+
                     setMessage(loginMessage, "Logged out.", "green");
                     showLogin();
                 } catch (error) {

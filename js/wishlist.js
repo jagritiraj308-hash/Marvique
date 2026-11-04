@@ -1,89 +1,186 @@
- /* =========================
+/* =========================
    WISHLIST
 ========================= */
 
-fetch("sections/wishlist.html")
-    .then(response => {
+import {
+    getProducts,
+    initProducts,
+    onProductsChange
+} from "./products.js";
+
+import { cloudinaryImageUrl } from "./cloudinary.js";
+import { openBuyModal } from "./buy.js";
+import { showToast } from "./toast.js";
+
+import {
+    readWishlist,
+    removeFromWishlist,
+    clearWishlist,
+    updateWishlistCount,
+    onWishlistChange
+} from "./wishlist-store.js";
+
+fetch("sections/wishlist.html?v=20261106")
+    .then(function (response) {
         if (!response.ok) {
             throw new Error("Could not load wishlist.html");
         }
         return response.text();
     })
-    .then(data => {
+    .then(function (data) {
+        const host = document.getElementById("wishlist-container");
 
-        const wishlistSection = document.getElementById("wishlist");
-        wishlistSection.innerHTML = data;
+        if (!host) return;
 
-        let wishlist = JSON.parse(
-            localStorage.getItem("marviqueWishlist") || "[]"
-        );
+        host.innerHTML = data;
 
-        const container = document.getElementById("wishlistItems");
-        const clearButton = document.getElementById("clearWishlist");
+        const grid = host.querySelector("#wishlistGrid");
+        const emptyState = host.querySelector("#wishlistEmpty");
+        const clearButton = host.querySelector("#clearWishlist");
 
-        function saveWishlist() {
-            localStorage.setItem(
-                "marviqueWishlist",
-                JSON.stringify(wishlist)
-            );
-        }
+        if (!grid) return;
 
-        function updateWishlistCount() {
-            const countElement = document.getElementById("wishlistCount");
+        let products = getProducts();
 
-            if (countElement) {
-                countElement.textContent = wishlist.length;
-            }
-        }
-
-        function displayWishlist() {
-            container.innerHTML = "";
-
-            if (wishlist.length === 0) {
-                container.textContent = "Your wishlist is empty ❤️";
-                return;
-            }
-
-            wishlist.forEach(product => {
-                const card = document.createElement("div");
-                card.className = "saved-product-card";
-
-                const name = document.createElement("h3");
-                name.textContent = product.name;
-
-                const price = document.createElement("p");
-                price.textContent = `₹${product.price} / sq.ft`;
-
-                const removeButton = document.createElement("button");
-                removeButton.className = "remove-wishlist";
-                removeButton.textContent = "Remove";
-
-                removeButton.addEventListener("click", function () {
-                    wishlist = wishlist.filter(
-                        item => item.id !== product.id
-                    );
-
-                    saveWishlist();
-                    displayWishlist();
-                    updateWishlistCount();
-                });
-
-                card.append(name, price, removeButton);
-                container.appendChild(card);
+        function findProduct(productId) {
+            return products.find(function (product) {
+                return String(product.id) === String(productId);
             });
         }
 
-        clearButton.addEventListener("click", function () {
-            wishlist = [];
-            saveWishlist();
-            displayWishlist();
+        function formatPrice(value) {
+            const price = Number(value);
+
+            if (!Number.isFinite(price) || price <= 0) {
+                return "Price on Request";
+            }
+
+            return "₹" + price.toLocaleString("en-IN") + " / sq.ft";
+        }
+
+        function hasPrice(product) {
+            const price = Number(product.price);
+            return Number.isFinite(price) && price > 0;
+        }
+
+        function createCard(product) {
+            const card = document.createElement("article");
+            card.className = "product-card";
+
+            const image = document.createElement("div");
+            image.className =
+                "product-image " +
+                String(product.category || "marble")
+                    .trim()
+                    .toLowerCase()
+                    .replace(/\s+/g, "-") +
+                "-image";
+
+            if (product.image) {
+                image.style.backgroundImage =
+                    'url("' +
+                    cloudinaryImageUrl(product.image, 900).replace(/"/g, "%22") +
+                    '")';
+            }
+
+            const category = document.createElement("span");
+            category.textContent = product.category || "";
+            image.appendChild(category);
+
+            const content = document.createElement("div");
+            content.className = "product-content";
+
+            const title = document.createElement("h3");
+            title.textContent = product.name || "Saved product";
+
+            const metaParts = [product.finish, product.size].filter(Boolean);
+
+            const price = document.createElement("p");
+            price.className = "product-price";
+            price.textContent = formatPrice(product.price);
+
+            const actions = document.createElement("div");
+            actions.className = "product-actions";
+
+            if (hasPrice(product)) {
+                const buyButton = document.createElement("button");
+                buyButton.type = "button";
+                buyButton.className = "buy-btn";
+                buyButton.textContent = "Buy Now";
+                buyButton.addEventListener("click", function () {
+                    openBuyModal(product);
+                });
+                actions.appendChild(buyButton);
+            }
+
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "remove-wishlist";
+            removeButton.textContent = "Remove";
+            removeButton.addEventListener("click", function () {
+                removeFromWishlist(product.id);
+                showToast(product.name + " removed from wishlist.");
+            });
+
+            actions.appendChild(removeButton);
+
+            content.appendChild(title);
+
+            if (metaParts.length) {
+                const meta = document.createElement("p");
+                meta.className = "product-meta";
+                meta.textContent = metaParts.join(" · ");
+                content.appendChild(meta);
+            }
+
+            content.append(price, actions);
+            card.append(image, content);
+
+            return card;
+        }
+
+        function render() {
+            const items = readWishlist();
+
+            grid.replaceChildren();
+
+            if (emptyState) {
+                emptyState.hidden = items.length > 0;
+            }
+
+            if (clearButton) {
+                clearButton.hidden = items.length === 0;
+            }
+
+            items.forEach(function (saved) {
+                const liveProduct = findProduct(saved.id);
+
+                grid.appendChild(
+                    createCard(Object.assign({}, saved, liveProduct || {}))
+                );
+            });
+
             updateWishlistCount();
+        }
+
+        if (clearButton) {
+            clearButton.addEventListener("click", function () {
+                if (!readWishlist().length) return;
+
+                clearWishlist();
+                showToast("Wishlist cleared.");
+            });
+        }
+
+        onWishlistChange(render);
+
+        onProductsChange(function (items) {
+            products = items || getProducts();
+            render();
         });
 
-        displayWishlist();
-        updateWishlistCount();
-
+        initProducts();
     })
-    .catch(error => {
+    .catch(function (error) {
         console.error("Wishlist loading error:", error);
     });

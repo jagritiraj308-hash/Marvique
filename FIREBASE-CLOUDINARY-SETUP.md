@@ -139,7 +139,70 @@ Then:
 
 ---
 
-## 6. Deploy (optional)
+## 6. Razorpay online payments (Buy Now)
+
+Products with a price now show a **Buy Now** button. Products without a price
+show **Price on Request** and no Buy button.
+
+Until Razorpay is configured, Buy Now falls back to a pre-filled WhatsApp
+order, so customers can still order.
+
+### a. Get API keys
+
+1. Open <https://dashboard.razorpay.com/app/keys>
+2. Generate a key (start with **Test mode**).
+3. Paste the **Key Id** (`rzp_test_...` or `rzp_live_...`) into
+   `razorpay-config.js` → `keyId`.
+
+### b. Server keys (never in the browser)
+
+Create `functions/.env` from the example:
+
+```bash
+copy functions\.env.example functions\.env
+```
+
+Fill in:
+
+```
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxxxx
+RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+`functions/.env` is git-ignored. The Key Secret must never appear in HTML/JS.
+
+### c. Deploy the payment functions
+
+Cloud Functions require the Firebase **Blaze** (pay-as-you-go) plan. The free
+tier is enough for a small shop.
+
+```bash
+cd functions
+npm install
+cd ..
+firebase deploy --only functions
+```
+
+Functions are deployed to `asia-south1`. The client and server use the same
+region (`razorpay-config.js` → `functionsRegion`).
+
+### d. How an order flows
+
+1. Customer enters quantity + contact details.
+2. `createRazorpayOrder` reads the price from the Realtime Database
+   (never trusts the browser), creates the Razorpay order and stores a
+   `created` order.
+3. Razorpay Checkout collects the payment.
+4. `verifyRazorpayPayment` verifies the HMAC signature, re-checks the amount
+   with Razorpay, and marks the order `paid`.
+5. The order appears in **Admin Panel → Orders** (admin-only read).
+
+Orders can only be written by the Admin SDK; the database rules deny client
+writes to `orders`.
+
+---
+
+## 7. Deploy (optional)
 
 ```bash
 firebase deploy --only database,hosting
@@ -160,7 +223,11 @@ domain under **Authentication → Settings → Authorized domains** if needed.
 | `js/products.js` | Realtime Database sync + localStorage fallback |
 | `js/featured.js` | Renders products, live updates |
 | `js/admin.js` | Admin auth, Cloudinary upload, add product |
-| `admin.html` | Image picker + preview + storage status |
+| `js/buy.js` | Buy Now modal, Razorpay checkout, WhatsApp fallback |
+| `js/orders.js` | Admin-only live order list |
+| `razorpay-config.js` | Public Razorpay Key Id + checkout settings |
+| `functions/index.js` | Order creation + signature verification |
+| `admin.html` | Image picker + preview + orders list |
 | `css/admin.css` | Admin form styles |
 | `database.rules.json` | Public read, admin-only write |
 | `firebase.json`, `.firebaserc` | Firebase CLI / hosting config |

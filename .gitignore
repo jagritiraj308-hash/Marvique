@@ -10,6 +10,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Never commit Cloudinary secrets
+# Never commit Cloudinary or Razorpay secrets
 .env
-.env.*
+functions/.env
