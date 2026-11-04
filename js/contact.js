@@ -6,7 +6,7 @@
 const WHATSAPP_NUMBER = "919931614860";
 const CUSTOMER_KEY = "marviqueCustomer";
 
-fetch("sections/contact.html?v=20261106")
+fetch("sections/contact.html?v=20261108")
     .then(function (response) {
         if (!response.ok) {
             throw new Error("Could not load contact.html");

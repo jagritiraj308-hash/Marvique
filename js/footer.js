@@ -2,7 +2,7 @@
    FOOTER
 ========================= */
 
-fetch("sections/footer.html?v=20261107")
+fetch("sections/footer.html?v=20261108")
     .then(function (response) {
         if (!response.ok) {
             throw new Error("Could not load footer.html");
