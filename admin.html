@@ -171,9 +171,16 @@
                     <p id="productCount">0</p>
                 </div>
 
-                <div class="dashboard-card">
+                <div
+                    class="dashboard-card dashboard-card--button"
+                    id="customersCard"
+                    role="button"
+                    tabindex="0"
+                    aria-expanded="false"
+                    aria-controls="adminCustomersSection">
                     <h4>Customers</h4>
                     <p id="customerCount">0</p>
+                    <span class="dashboard-card-hint">View all details →</span>
                 </div>
 
                 <div class="dashboard-card">
@@ -257,9 +264,20 @@
             </div>
 
 
-            <div class="admin-customers">
+            <div class="admin-customers" id="adminCustomersSection" hidden>
 
-                <h3>Customers</h3>
+                <div class="admin-customers-head">
+
+                    <h3>Customers</h3>
+
+                    <button
+                        type="button"
+                        class="admin-link-btn"
+                        id="hideCustomersBtn">
+                        Hide
+                    </button>
+
+                </div>
 
                 <p class="admin-hint">
                     People who signed in on the website.

@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    fetch("admin.html?v=20261109b")
+    fetch("admin.html?v=20261109c")
         .then(function (response) {
             if (!response.ok) {
                 throw new Error("Could not load admin.html");
@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const orderList = document.getElementById("adminOrderList");
         const customerCount = document.getElementById("customerCount");
         const customerList = document.getElementById("adminCustomerList");
+        const customersCard = document.getElementById("customersCard");
+        const customersSection = document.getElementById("adminCustomersSection");
+        const hideCustomersBtn = document.getElementById("hideCustomersBtn");
 
         let isAdmin = false;
         let previewUrl = null;
@@ -289,6 +292,24 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
+        function setCustomersOpen(open) {
+            if (!customersSection) return;
+
+            customersSection.hidden = !open;
+
+            if (customersCard) {
+                customersCard.setAttribute("aria-expanded", String(open));
+                customersCard.classList.toggle("is-open", open);
+            }
+
+            if (open) {
+                customersSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        }
+
         function renderCustomers(customers, error) {
             const visibleCustomers = customers.filter(function (customer) {
                 return !isAdminEmail(customer.email);
@@ -319,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            visibleCustomers.slice(0, 50).forEach(function (customer) {
+            visibleCustomers.forEach(function (customer) {
                 const card = document.createElement("article");
                 card.className = "admin-customer";
 
@@ -633,10 +654,36 @@ document.addEventListener("DOMContentLoaded", function () {
                         customerCount.textContent = "0";
                     }
 
+                    setCustomersOpen(false);
                     setMessage(loginMessage, "Logged out.", "green");
                     showLogin();
                 } catch (error) {
                     console.error("Logout error:", error);
+                }
+            });
+        }
+
+        /* ---------- customers card toggle ---------- */
+
+        if (customersCard) {
+            customersCard.addEventListener("click", function () {
+                setCustomersOpen(!!customersSection.hidden);
+            });
+
+            customersCard.addEventListener("keydown", function (event) {
+                if (event.key !== "Enter" && event.key !== " ") return;
+
+                event.preventDefault();
+                setCustomersOpen(!!customersSection.hidden);
+            });
+        }
+
+        if (hideCustomersBtn) {
+            hideCustomersBtn.addEventListener("click", function () {
+                setCustomersOpen(false);
+
+                if (customersCard) {
+                    customersCard.focus();
                 }
             });
         }
