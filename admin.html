@@ -35,7 +35,55 @@
                 Login
             </button>
 
-            <p id="loginMessage"></p>
+            <button
+                type="button"
+                id="forgotPasswordBtn"
+                class="admin-link-btn">
+                Forgot password?
+            </button>
+
+            <p id="loginMessage" role="status"></p>
+
+            <div class="admin-contact">
+
+                <h4>Need help signing in?</h4>
+
+                <div class="admin-contact-block">
+                    <span class="admin-contact-label">Gaya showroom</span>
+                    <p>
+                        Shisaudia Enterprises, Surahri More,
+                        near HP Petrol Pump, opposite Manpur,
+                        Gaya Bypass, Gaya, Bihar.
+                    </p>
+                </div>
+
+                <div class="admin-contact-block">
+                    <span class="admin-contact-label">Nawada showroom</span>
+                    <p>
+                        Ward no. 09, Bhulan Bigaha,
+                        Rajgir Road, Hisua, Nawada, Bihar.
+                    </p>
+                </div>
+
+                <div class="admin-contact-block">
+                    <span class="admin-contact-label">Call us</span>
+                    <p class="admin-contact-phones">
+                        <a href="tel:+919931614860">+91 99316 14860</a>
+                        <a href="tel:+917482815069">+91 74828 15069</a>
+                        <a href="tel:+919279880419">+91 92798 80419</a>
+                    </p>
+                </div>
+
+                <div class="admin-contact-block">
+                    <span class="admin-contact-label">Email</span>
+                    <p>
+                        <a href="mailto:sunilsinghgaya8@gmail.com">
+                            sunilsinghgaya8@gmail.com
+                        </a>
+                    </p>
+                </div>
+
+            </div>
 
         </div>
 
@@ -47,6 +95,73 @@
 
             <h3>Dashboard</h3>
 
+            <div class="admin-account" id="adminAccount" hidden>
+
+                <div class="admin-account-head">
+
+                    <div
+                        class="admin-account-avatar"
+                        id="adminAccountAvatar"
+                        aria-hidden="true">
+                        A
+                    </div>
+
+                    <div class="admin-account-identity">
+
+                        <p class="admin-account-label">
+                            Signed in as
+                        </p>
+
+                        <p
+                            class="admin-account-email"
+                            id="adminAccountEmail">
+                            —
+                        </p>
+
+                    </div>
+
+                    <span class="admin-account-badge">
+                        ADMIN
+                    </span>
+
+                </div>
+
+                <dl class="admin-account-list">
+
+                    <div>
+                        <dt>Display name</dt>
+                        <dd id="adminAccountName">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Email verified</dt>
+                        <dd id="adminAccountVerified">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>User ID</dt>
+                        <dd id="adminAccountUid">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Sign-in method</dt>
+                        <dd id="adminAccountProvider">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Account created</dt>
+                        <dd id="adminAccountCreated">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Last sign-in</dt>
+                        <dd id="adminAccountLastLogin">—</dd>
+                    </div>
+
+                </dl>
+
+            </div>
+
             <p class="admin-storage" id="adminStorageStatus"></p>
 
             <div class="dashboard-cards">
@@ -54,6 +169,11 @@
                 <div class="dashboard-card">
                     <h4>Products</h4>
                     <p id="productCount">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h4>Customers</h4>
+                    <p id="customerCount">0</p>
                 </div>
 
                 <div class="dashboard-card">
@@ -133,6 +253,21 @@
                 </button>
 
                 <p id="productMessage"></p>
+
+            </div>
+
+
+            <div class="admin-customers">
+
+                <h3>Customers</h3>
+
+                <p class="admin-hint">
+                    People who signed in on the website.
+                </p>
+
+                <div class="admin-customer-list" id="adminCustomerList">
+                    <p class="admin-order-empty">Log in as admin to load customers.</p>
+                </div>
 
             </div>
 

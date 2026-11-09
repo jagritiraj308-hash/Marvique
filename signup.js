@@ -1,5 +1,7 @@
 import { auth } from "./firebase-config.js";
 
+import { recordCustomer } from "./js/customers.js";
+
 import {
   createUserWithEmailAndPassword,
   updateProfile
@@ -33,6 +35,8 @@ if (signupForm) {
           displayName: name
         });
       }
+
+      await recordCustomer(result.user, { event: "signup", name: name });
 
       localStorage.setItem("marviqueLoggedIn", "true");
       localStorage.setItem("marviqueUser", email);

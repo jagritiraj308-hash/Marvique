@@ -1,6 +1,8 @@
 
 import { auth } from "./firebase-config.js";
 
+import { recordCustomer } from "./js/customers.js";
+
 import {
     signInWithEmailAndPassword,
     sendPasswordResetEmail
@@ -36,7 +38,9 @@ if (loginForm && emailInput && passwordInput && message) {
         const password = passwordInput.value;
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const credential = await signInWithEmailAndPassword(auth, email, password);
+
+            recordCustomer(credential.user, { event: "login" }).catch(function () {});
 
             message.textContent = "Login successful! Redirecting...";
             message.style.color = "green";
